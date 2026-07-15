@@ -1,4 +1,5 @@
 const STORAGE_KEY='immoUserScenariosV3';
+const SCENARIOS_FILE='scenarios.json';
 const COLOR_OPTIONS=[{value:'co',label:'Blue'},{value:'pr',label:'Green'},{value:'ct',label:'Gray'},{value:'ig',label:'Dark Gray'},{value:'pi',label:'Orange'},{value:'go',label:'Red'},{value:'custom',label:'Purple'}];
 
 const MONTHS_BASE=[
@@ -20,6 +21,9 @@ const DEFAULT_SCENARIOS={
 
 let calendarStartMonth='aug',locale='fi',months=[],weeks=[];
 let state=JSON.parse(JSON.stringify(DEFAULT_SCENARIOS.Default.data)),offWeeks=new Set(),isViewMode=true,userScenarios={},events={},projectCounter=100,rowCounter=1000;
+let globalScenarios=JSON.parse(JSON.stringify(DEFAULT_SCENARIOS));
+
+const isAdmin=new URLSearchParams(location.search).get('admin')==='1';
 
 const deepCopy=o=>JSON.parse(JSON.stringify(o));
 const nextWeek=w=>w===YEAR_WEEKS?1:w+1;
@@ -81,14 +85,52 @@ function computeProjectRows(p){let s=Math.max(1,Math.min(YEAR_WEEKS,Number(p.sta
 
 function loadUserScenarios(){try{userScenarios=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');}catch(e){userScenarios={};}}
 function persistUserScenarios(){localStorage.setItem(STORAGE_KEY,JSON.stringify(userScenarios));}
-function getAllScenarios(){return {...DEFAULT_SCENARIOS,...userScenarios};}
+function getAllScenarios(){return {...globalScenarios,...userScenarios};}
 function refreshScenarioDropdown(selName=''){const sel=document.getElementById('scenarioSelect');const names=Object.keys(getAllScenarios()).sort((a,b)=>a.localeCompare(b));sel.innerHTML='<option value="">(Select scenario)</option>'+names.map(n=>'<option value="'+n+'">'+n+'</option>').join('');if(selName&&getAllScenarios()[selName])sel.value=selName;}
 function getSnapshot(){return{data:deepCopy(state),offWeeksInput:document.getElementById('offWeeksInput').value,events:deepCopy(events),calendarStartMonth,locale};}
 function applySnapshot(s){if(!s||!s.data)return;state=deepCopy(s.data);calendarStartMonth=s.calendarStartMonth||'aug';locale=s.locale||'fi';applyCalendarSettings();document.getElementById('offWeeksInput').value=s.offWeeksInput||'';offWeeks=parseOffWeeks(s.offWeeksInput||'');events=s.events?deepCopy(s.events):{};render();}
 function saveNamedScenario(){const n=document.getElementById('configName').value.trim();if(!n)return;userScenarios[n]=getSnapshot();persistUserScenarios();refreshScenarioDropdown(n);}
 function loadSelectedScenario(){const n=document.getElementById('scenarioSelect').value,a=getAllScenarios();if(n&&a[n]){applySnapshot(a[n]);document.getElementById('configName').value=n;}}
-function overwriteSelectedScenario(){const n=document.getElementById('scenarioSelect').value;if(!n)return;userScenarios[n]=getSnapshot();persistUserScenarios();refreshScenarioDropdown(n);}
-function deleteSelectedScenario(){const n=document.getElementById('scenarioSelect').value;if(!n||DEFAULT_SCENARIOS[n]||!userScenarios[n])return;delete userScenarios[n];persistUserScenarios();refreshScenarioDropdown('');}
+function overwriteSelectedScenario(){
+  const n=document.getElementById('scenarioSelect').value;if(!n)return;
+  if(globalScenarios[n]){userScenarios[n]=getSnapshot();persistUserScenarios();refreshScenarioDropdown(n);return;}
+  userScenarios[n]=getSnapshot();persistUserScenarios();refreshScenarioDropdown(n);
+}
+function deleteSelectedScenario(){
+  const n=document.getElementById('scenarioSelect').value;if(!n)return;
+  if(!globalScenarios[n]&&userScenarios[n]){delete userScenarios[n];persistUserScenarios();refreshScenarioDropdown('');}
+}
+async function exportGlobalScenarios(){
+  if(!isAdmin)return;
+  const txt=JSON.stringify(getAllScenarios(),null,2);
+  const blob=new Blob([txt],{type:'application/json;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='scenarios.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  try{
+    await navigator.clipboard.writeText(txt);
+  }catch(e){}
+}
+async function loadGlobalScenariosFromFile(){
+  try{
+    const res=await fetch(SCENARIOS_FILE,{cache:'no-store'});
+    if(!res.ok)return;
+    const obj=await res.json();
+    if(obj && typeof obj==='object' && Object.keys(obj).length){
+      globalScenarios=obj;
+      const firstName=Object.keys(globalScenarios)[0];
+      if(firstName && globalScenarios[firstName] && globalScenarios[firstName].data){
+        applySnapshot(globalScenarios[firstName]);
+      }
+    }
+  }catch(e){}
+}
 function setProjectStart(pi,v){state.projects[pi].start=Math.max(1,Math.min(YEAR_WEEKS,Number(v)||1));render();}
 function setProjectName(pi,v){state.projects[pi].name=v||('Project '+(pi+1));render();}
 function setRowName(pi,ri,v){state.projects[pi].rows[ri].name=v||('Row '+(ri+1));render();}
@@ -178,6 +220,19 @@ document.getElementById('deleteScenario').addEventListener('click',deleteSelecte
 document.getElementById('addProjectBtn').addEventListener('click',addProject);
 document.getElementById('generateBtn').addEventListener('click',generateScenario);
 
-offWeeks=parseOffWeeks(document.getElementById('offWeeksInput').value);
-applyCalendarSettings();
-loadUserScenarios();refreshScenarioDropdown();applyMode();render();
+if(isAdmin){
+  const c=document.querySelector('.controls');
+  c.insertAdjacentHTML('beforeend','<button id="exportGlobalScenarios" class="edit-only">Export global JSON</button>');
+  document.getElementById('exportGlobalScenarios').addEventListener('click',exportGlobalScenarios);
+}
+
+async function init(){
+  offWeeks=parseOffWeeks(document.getElementById('offWeeksInput').value);
+  applyCalendarSettings();
+  loadUserScenarios();
+  await loadGlobalScenariosFromFile();
+  refreshScenarioDropdown();
+  applyMode();
+  render();
+}
+init();
