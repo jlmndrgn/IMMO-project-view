@@ -1,0 +1,45 @@
+body{font-family:Segoe UI,Arial;margin:0;background:#f4f6f8}
+header{background:#163a63;color:#fff;padding:10px}
+.wrap{padding:8px;overflow-x:auto}
+.grid{display:grid;grid-template-columns:460px repeat(52,minmax(22px,1fr));min-width:1614px}
+body.view-mode .grid{grid-template-columns:220px repeat(52,minmax(22px,1fr));min-width:1374px}
+.cell{height:22px;border:1px solid #ddd;position:relative;overflow:hidden;cursor:default}
+.cell.clickable{cursor:pointer}
+.m1{background:#d0deef;text-align:center;font-weight:700;font-size:11px;white-space:nowrap}
+.m2{background:#b9cde5;text-align:center;font-weight:700;font-size:11px;white-space:nowrap}
+.k1{background:#fff}
+.k2{background:#dfe9f5}
+.off{background:#f4cccc}
+.month{border-right:3px solid #7588a3}
+.co{background:#4f81bd}
+.pr{background:#70ad47}
+.ct{background:#a5a5a5}
+.ig{background:#636363}
+.pi{background:#ed7d31}
+.go{background:#c00000}
+.custom{background:#7f56d9}
+.rowlbl{font-size:11px;display:flex;align-items:center;gap:4px;padding:2px;white-space:nowrap;overflow:hidden}
+.row-title{min-width:120px;overflow:hidden;text-overflow:ellipsis}
+input{width:44px;font-size:11px}
+select{font-size:11px}
+.row-name-input{width:120px!important}
+.project-name-input{width:90px!important}
+.color-select{width:86px!important}
+.meta-head{font-size:10px;color:#4e5f75;background:#eef3fb}
+.summary{grid-column:1 / -1;font-size:11px;padding:4px 8px;background:#eef3fb;color:#163a63;border-bottom:3px solid #163a63}
+.dot{width:7px;height:7px;border-radius:50%;background:#163a63;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.controls{display:flex;gap:8px;align-items:center;padding:8px;font-size:12px;flex-wrap:wrap}
+.controls input{width:260px}
+.modebtn{background:#163a63;color:#fff;border:0;padding:6px 10px;cursor:pointer;border-radius:4px}
+.smallbtn{border:1px solid #9aa9bf;background:#fff;color:#163a63;padding:2px 6px;border-radius:4px;cursor:pointer;font-size:11px}
+select,.small-input{font-size:12px;padding:4px 6px}
+.small-input{width:170px!important}
+.project-label-view{display:none}
+.view-mode .controls .edit-only{display:none!important}
+.view-mode .controls .shared-visible{display:inline-block!important}
+.view-mode input[data-bind], .view-mode select[data-bind]{display:none!important}
+.view-mode .edit-inline,.view-mode .meta-head{display:none!important}
+.view-mode .project-name-input,.view-mode .row-name-input{display:none!important}
+.view-mode .project-label-view{display:inline!important;font-weight:700}
+.view-mode .row-label-view{display:inline!important;overflow:hidden;text-overflow:ellipsis}
+.row-label-view{display:none}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IMMO aikataulu</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><b>IMMO aikataulu</b></header>
+<div class="controls">
+  <button id="toggleMode" class="modebtn">Switch to View mode</button>
+  <label class="edit-only">Calendar starts:
+    <select id="calendarStartMonth"></select>
+  </label>
+  <label class="edit-only">Language:
+    <select id="localeSelect">
+      <option value="fi">FI</option>
+      <option value="en">EN</option>
+    </select>
+  </label>
+  <label class="edit-only">Off-weeks: <input id="offWeeksInput" value="42,52,1,8"></label>
+  <button id="applyOffWeeks" class="edit-only">Apply</button>
+  <select id="scenarioSelect" class="edit-only shared-visible"><option value="">(Select scenario)</option></select>
+  <button id="loadScenario" class="edit-only shared-visible">Load</button>
+  <input id="configName" class="small-input edit-only" value="Scenario 1" placeholder="Scenario name">
+  <button id="saveConfig" class="edit-only">Save as</button>
+  <button id="overwriteScenario" class="edit-only">Overwrite selected</button>
+  <button id="deleteScenario" class="edit-only">Delete selected</button>
+  <button id="addProjectBtn" class="edit-only">+ Add project</button>
+  <button id="generateBtn" class="edit-only">Generate</button>
+</div>
+<div class="wrap"><div id="chart"></div></div>
+
+<script src="script.js"></script>
+</body>
+</html>
